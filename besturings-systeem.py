@@ -103,7 +103,7 @@ def grafiek(device, device2 = 0, device3 = 0):
         fig, (ax1, ax2) = plt.subplots(2)
         line1, = ax1.plot(y_var1,label="Licht kracht")
         y_var2 = np.array(np.zeros([plot_window]))
-        line2, = ax2.plot(y_var2, label="Tempratuur" )
+        line2, = ax2.plot(y_var2, label="Tempratuur")
         ax2.legend(loc="upper right")
         ax2.legend()
 
@@ -160,6 +160,7 @@ def grafiek(device, device2 = 0, device3 = 0):
 
 
         fig.canvas.flush_events()
+
 #deze functie kijkt eerst hoeveel devices er mee gegeven zijn in de argumenten en maakt op basis van die info een popup met 1, 2 of 3 grafieken.
 #Daarnaast laadt hij elke 30 keer controleren of de tempratuur& de zonnenkracht te warm/koud etc zijn om het luik te openen/sluiten
 #Door: Frank Kistemaker
@@ -217,7 +218,6 @@ def changeTemp():
         update_label4.grid(row=5)
 
 
-
 def changeLicht():
     global min_licht
     global max_licht
@@ -239,9 +239,6 @@ def changeLicht():
 
     except:
         update_label3.grid(row=5)
-
-
-
 
 
 tkWindow = Tk()
@@ -296,12 +293,12 @@ change_button2.configure(bd=3, background='grey35', fg='white', activebackground
 
 
 start_button = Button(main_frame, command=lambda:Devices(COM5, COM4, COM6), text="Start programma", padx=60, pady=20)
-#if COM5 != 0:
-Button(main_frame, command=lambda: Devices(COM5), text="COM5 live data", padx=60, pady=20, background='lightblue4', fg='white', activebackground='grey80', activeforeground='lightblue4').grid(row=1, column=1, sticky=E+W)
-#if COM4 !=0:
-Button(main_frame, command=lambda: Devices(COM4), text="COM4 live data", padx=60, pady=20, background='lightblue4', fg='white', activebackground='grey80', activeforeground='lightblue4').grid(row=2, column=1, sticky=E+W)
-#if COM6 !=0:
-Button(main_frame, command=lambda: Devices(COM6), text="COM6 live data", padx=60, pady=20, background='lightblue4', fg='white', activebackground='grey80', activeforeground='lightblue4').grid(row=3, column=1, sticky=E+W)
+if COM5 != 0:
+    Button(main_frame, command=lambda: Devices(COM5), text="COM5 live data", padx=60, pady=20, background='lightblue4', fg='white', activebackground='grey80', activeforeground='lightblue4').grid(row=1, column=1, sticky=E+W)
+if COM4 !=0:
+    Button(main_frame, command=lambda: Devices(COM4), text="COM4 live data", padx=60, pady=20, background='lightblue4', fg='white', activebackground='grey80', activeforeground='lightblue4').grid(row=2, column=1, sticky=E+W)
+if COM6 !=0:
+    Button(main_frame, command=lambda: Devices(COM6), text="COM6 live data", padx=60, pady=20, background='lightblue4', fg='white', activebackground='grey80', activeforeground='lightblue4').grid(row=3, column=1, sticky=E+W)
 open_button = Button(main_frame, command=openWindow, text="Open luik",padx=79, pady=20)
 close_button = Button(main_frame, command=closeWindow, text="Luik dicht", padx=78, pady=20)
 quit_button = Button(main_frame, text='Quit', command=tkWindow.quit, padx=93, pady=20)
