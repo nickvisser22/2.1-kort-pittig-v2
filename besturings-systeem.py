@@ -16,25 +16,30 @@ from tkinter import ttk
 COM4 = 0
 COM5 = 0
 COM6 = 0
+min_temp = 18
+max_temp = 20
+min_licht = 100
+max_licht = 100
+
 
 try:
     COM4 = serial.Serial('COM4', 9800)
     COM4.flushInput()
-except: 
+except:
     print("COM 4 is niet aangesloten")
 try:
     COM5 = serial.Serial('COM5', 9800)
     COM5.flushInput()
 
-except: 
+except:
     print("COM 5 is niet aangesloten")
 
 try:
     COM6 = serial.Serial('COM6', 9800)
     COM6.flushInput()
 
-except: 
-    print("COM 6 is niet aangesloten")    
+except:
+    print("COM 6 is niet aangesloten")
 #Het bovenstaande stuk code, controleert of de Arduino's beschikbaar zijn en maakt de connectie.
 
 
@@ -48,7 +53,7 @@ def getLuik():
 
 def setLuik(luik):
     global luikDicht
-    luikDicht = luik 
+    luikDicht = luik
 
 # een setter en een getter voor global luik
 
@@ -73,13 +78,12 @@ def gemiddelde(lijst):
 # De bovenstaande functie geeft het gemiddelde van een lijst
 # Door: Frank Kistemaker & Nick Visser
 
-def checkdata(licht, tempratuur):
-    if licht > 100 and tempratuur >18 and luikDicht == False :
-        closeWindow()
-    elif licht<100 and tempratuur <20 and luikDicht == True:
-        openWindow()
-    
 
+def checkdata(licht, tempratuur):
+    if licht < min_licht and tempratuur < min_temp and luikDicht == False :
+        closeWindow()
+    elif licht > max_licht and tempratuur > max_temp and luikDicht == True:
+        openWindow()
 
 
 def grafiek(device, device2 = 0, device3 = 0):
@@ -100,7 +104,7 @@ def grafiek(device, device2 = 0, device3 = 0):
         line1, = ax1.plot(y_var1,label="Licht kracht")
         y_var2 = np.array(np.zeros([plot_window]))
         line2, = ax2.plot(y_var2, label="Tempratuur" )
-        ax2.legend(loc="upper right")    
+        ax2.legend(loc="upper right")
         ax2.legend()
 
     if device3 != 0:
@@ -110,14 +114,14 @@ def grafiek(device, device2 = 0, device3 = 0):
         line1, = ax1.plot(y_var1,label="device 1")
         y_var2 = np.array(np.zeros([plot_window]))
         line2, = ax2.plot(y_var2, label="device 2" )
-        ax2.legend(loc="upper right")    
+        ax2.legend(loc="upper right")
         ax2.legend()
-        ax3.legend(loc="upper right")    
+        ax3.legend(loc="upper right")
         ax3.legend()
 
     plt.ion()
-    
-    ax1.legend(loc="upper right")    
+
+    ax1.legend(loc="upper right")
     ax1.legend()
     counter = 0
 
@@ -126,7 +130,7 @@ def grafiek(device, device2 = 0, device3 = 0):
         y_var1 = np.append(y_var1,getData(device, 'licht'))
         y_var1 = y_var1[1:plot_window+1]
 
-        if device2 != 0:        
+        if device2 != 0:
             y_var2 = np.append(y_var2,getData(device2, 'temp'))
             y_var2 = y_var2[1:plot_window+1]
             line2.set_ydata(y_var2)
@@ -134,7 +138,7 @@ def grafiek(device, device2 = 0, device3 = 0):
             ax2.relim()
             ax2.autoscale_view()
 
-        if device3 != 0:        
+        if device3 != 0:
             y_var3 = np.append(y_var3,getData(device3))
             y_var3 = y_var3[1:plot_window+1]
             line3.set_ydata(y_var3)
@@ -152,15 +156,13 @@ def grafiek(device, device2 = 0, device3 = 0):
         if counter == 30:
             checkdata(getData(device, 'licht'),getData(device2, 'temp'))
             counter = 0
-        counter +=1    
+        counter +=1
 
 
         fig.canvas.flush_events()
 #deze functie kijkt eerst hoeveel devices er mee gegeven zijn in de argumenten en maakt op basis van die info een popup met 1, 2 of 3 grafieken.
 #Daarnaast laadt hij elke 30 keer controleren of de tempratuur& de zonnenkracht te warm/koud etc zijn om het luik te openen/sluiten
-#Door: Frank Kistemaker 
-
-
+#Door: Frank Kistemaker
 
 
 def closeWindow():
@@ -174,7 +176,6 @@ def closeWindow():
         print("Het luik was al dicht!")
 
 
-
 def openWindow():
     if getLuik() == True:
         COM5.write(b'D')
@@ -184,22 +185,137 @@ def openWindow():
     else:
         print("Het luik was al open!")
 
+
 def Devices(device, device2= 0, device3 = 0):
     grafiek(device,device2,device3)
 
 
-tkWindow = Tk()  
-tkWindow.geometry('800x400')  
-tkWindow.title('Command control base je weet')
-Button(tkWindow, command=lambda: Devices(COM5, COM4, COM6),text="Start programma" ).pack()  
-if COM5 != 0:
-    Button(tkWindow, command=lambda: Devices(COM5),text="COM5 live data" ).pack()  
-if COM4 !=0:
-    Button(tkWindow, command=lambda: Devices(COM4),text="COM4 live data" ).pack() 
-if COM6 !=0:
-    Button(tkWindow, command=lambda: Devices(COM6),text="COM6 live data" ).pack() 
-Button(tkWindow, command=openWindow,text="Open luik" ).pack()  
-Button(tkWindow, command=closeWindow, text="luik dicht").pack()  
-Button(tkWindow, text='Quit', command=tkWindow.quit).pack()
+def changeTemp():
+    global min_temp
+    global max_temp
+
+    update_label = Label(frame, text="-waarden geupdate-", width=20, background='grey23', fg='white')
+    update_label4 = Label(frame, text="-onjuiste waarde-", width=20, background='grey23', fg='white')
+
+
+    try:
+        waarde1 = e1.get()
+        waarde2 = e2.get()
+
+        e1.delete(0, END)
+        e2.delete(0, END)
+        e1.insert(0, "Max. waarde (°C)")
+        e2.insert(0, "Min. waarde (°C)")
+
+        min_temp=int(waarde2)
+        max_temp=int(waarde1)
+
+        update_label.grid(row=5)
+        print(str(min_temp))
+        print(str(max_temp))
+    except:
+        update_label4.grid(row=5)
+
+
+
+def changeLicht():
+    global min_licht
+    global max_licht
+    update_label2 = Label(frame2, text="-waarden geupdate-", width=20, background='grey23', fg='white')
+    update_label3 = Label(frame2, text="-onjuiste waarden-", width=20, background='grey23', fg='white')
+    try:
+        waarde1 = e3.get()
+        waarde2 = e4.get()
+
+        e3.delete(0, END)
+        e4.delete(0, END)
+        e3.insert(0, "Max. waarde")
+        e4.insert(0, "Min. waarde")
+
+        min_licht=int(waarde2)
+        max_licht=int(waarde1)
+
+        update_label2.grid(row=5)
+
+    except:
+        update_label3.grid(row=5)
+
+
+
+
+
+tkWindow = Tk()
+tkWindow.geometry('800x400')
+tkWindow.title('User Interface')
+tkWindow.configure(background='grey15')
+tkWindow.overrideredirect(1)
+
+main_frame= LabelFrame(tkWindow, padx=15, pady=15, borderwidth=0)
+main_frame.pack(padx=15, pady=15)
+main_frame.configure(highlightthickness=4, highlightbackground='grey60', background='grey23')
+
+frame = LabelFrame(main_frame, text="")
+frame.grid(column=2, row=1, rowspan=2, padx=10)
+frame.configure(highlightthickness=3, highlightbackground='grey60', background='grey23')
+
+label = Label(frame, text="Verander temperatuur waarden:")
+label.grid(row=1, sticky=W+E)
+label.configure(bd=3, background='grey35', fg='white')
+e1 = Entry(frame, width=30, background='grey23', fg= 'white')
+e1.grid(row=2, sticky=N)
+e1.insert(0, "Max. waarde (°C)")
+e2 = Entry(frame, width=30, background='grey23', fg='white')
+e2.grid(row=3, sticky=S)
+e2.insert(0, "Min. waarde (°C)")
+label2 = Label(frame, width=20, background='grey23', fg='white')
+label2.grid(row=5, sticky=W+E)
+
+change_button = Button(frame, command=changeTemp, text="Verander waarden")
+change_button.grid(row=4, sticky=W+E)
+change_button.configure(bd=3, background='grey35', fg='white', activebackground='grey80', activeforeground='grey20')
+
+frame2 = LabelFrame(main_frame, text="")
+frame2.grid(column=2, row=3, rowspan=2, padx=10)
+frame2.configure(highlightthickness=3, highlightbackground='grey60', background='grey23')
+
+label2 = Label(frame2, text="Verander licht waarden:")
+label2.grid(row=1, sticky=W+E)
+label2.configure(bd=3, background='grey35', fg='white')
+e3 = Entry(frame2, width=30, background='grey23', fg= 'white')
+e3.grid(row=2, sticky=N)
+e3.insert(0, "Max. waarde")
+e4 = Entry(frame2, width=30, background='grey23', fg= 'white')
+e4.grid(row=3, sticky=S)
+e4.insert(0, "Min. waarde")
+label3 = Label(frame2, width=20, background='grey23', fg='white')
+label3.grid(row=5, sticky=W+E)
+
+change_button2 = Button(frame2, command=changeLicht, text="Verander waarden")
+change_button2.grid(row=4, sticky=W+E)
+change_button2.configure(bd=3, background='grey35', fg='white', activebackground='grey80', activeforeground='grey20')
+
+
+start_button = Button(main_frame, command=lambda:Devices(COM5, COM4, COM6), text="Start programma", padx=60, pady=20)
+#if COM5 != 0:
+Button(main_frame, command=lambda: Devices(COM5), text="COM5 live data", padx=60, pady=20, background='lightblue4', fg='white', activebackground='grey80', activeforeground='lightblue4').grid(row=1, column=1, sticky=E+W)
+#if COM4 !=0:
+Button(main_frame, command=lambda: Devices(COM4), text="COM4 live data", padx=60, pady=20, background='lightblue4', fg='white', activebackground='grey80', activeforeground='lightblue4').grid(row=2, column=1, sticky=E+W)
+#if COM6 !=0:
+Button(main_frame, command=lambda: Devices(COM6), text="COM6 live data", padx=60, pady=20, background='lightblue4', fg='white', activebackground='grey80', activeforeground='lightblue4').grid(row=3, column=1, sticky=E+W)
+open_button = Button(main_frame, command=openWindow, text="Open luik",padx=79, pady=20)
+close_button = Button(main_frame, command=closeWindow, text="Luik dicht", padx=78, pady=20)
+quit_button = Button(main_frame, text='Quit', command=tkWindow.quit, padx=93, pady=20)
+
+start_button.grid(row=1, column=0, padx=5, sticky=E+W)
+open_button.grid(row=2, column=0, padx=5, sticky=E+W)
+close_button.grid(row=3, column=0, padx=5, sticky=E+W)
+quit_button.grid(row=4, column=0, padx=5, sticky=E+W)
+
+start_button.configure(bd=3, background='grey35', fg='white', activebackground='grey80', activeforeground='grey20')
+open_button.configure(bd=3, background='grey35', fg='white', activebackground='grey80', activeforeground='grey20')
+close_button.configure(bd=3, background='grey35', fg='white', activebackground='grey80', activeforeground='grey20')
+quit_button.configure(bd=3, background='grey35', fg='white', activebackground='grey80', activeforeground='grey20')
+
+
 tkWindow.mainloop()
 
